@@ -13,7 +13,9 @@ const listRegistryItemsSchema = {
   query: z
     .string()
     .optional()
-    .describe("Optional text filter applied to names, titles, descriptions, and categories."),
+    .describe(
+      "Optional text filter applied to names, titles, descriptions, and registry metadata.",
+    ),
   limit: z
     .number()
     .int()
@@ -43,7 +45,9 @@ const searchRegistryItemsSchema = {
   query: z
     .string()
     .min(1)
-    .describe("Search query matched against names, titles, descriptions, and categories."),
+    .describe(
+      "Search query matched against names, titles, descriptions, and registry metadata.",
+    ),
   kind: z
     .string()
     .optional()
@@ -74,7 +78,7 @@ export function registerGenericTools(server: McpServer) {
 
   server.tool(
     "getRegistryItem",
-    "Gets detailed information for a single Magic UI registry item.",
+    "Gets detailed information for a single Magic UI registry item, including install info and optional source/examples.",
     getRegistryItemSchema,
     async (args) => {
       try {
