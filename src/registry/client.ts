@@ -1,15 +1,17 @@
 import type { ZodType } from "zod";
 import type {
+  RegistryEntry,
   RegistryComponent,
   RegistryComponentDetail,
   RegistryExample,
   RegistryExampleDetail,
+  RegistryItemDetail,
 } from "../domain/registry.js";
 import {
-  ComponentDetailSchema,
   ComponentSchema,
   ExampleComponentSchema,
   ExampleDetailSchema,
+  RegistryItemDetailSchema,
   RegistryResponseSchema,
 } from "./schemas.js";
 
@@ -37,10 +39,13 @@ export async function fetchRegistry() {
   return fetchJson(REGISTRY_URL, RegistryResponseSchema, "registry.json");
 }
 
-export async function fetchUIComponents(): Promise<RegistryComponent[]> {
+export async function fetchRegistryEntries(): Promise<RegistryEntry[]> {
   const registry = await fetchRegistry();
+  return registry.items;
+}
 
-  return registry.items.flatMap((item) => {
+export function parseUIComponents(entries: RegistryEntry[]): RegistryComponent[] {
+  return entries.flatMap((item) => {
     if (item.type !== "registry:ui") {
       return [];
     }
@@ -55,20 +60,28 @@ export async function fetchUIComponents(): Promise<RegistryComponent[]> {
   });
 }
 
-export async function fetchComponentDetails(
+export async function fetchUIComponents(): Promise<RegistryComponent[]> {
+  return parseUIComponents(await fetchRegistryEntries());
+}
+
+export async function fetchRegistryItemDetails(
   name: string,
-): Promise<RegistryComponentDetail> {
+): Promise<RegistryItemDetail> {
   return fetchJson(
     `${REGISTRY_ITEM_URL}/${name}`,
-    ComponentDetailSchema,
-    `component ${name}`,
+    RegistryItemDetailSchema,
+    `registry item ${name}`,
   );
 }
 
-export async function fetchExampleComponents(): Promise<RegistryExample[]> {
-  const registry = await fetchRegistry();
+export async function fetchComponentDetails(
+  name: string,
+): Promise<RegistryComponentDetail> {
+  return fetchRegistryItemDetails(name);
+}
 
-  return registry.items.flatMap((item) => {
+export function parseExampleComponents(entries: RegistryEntry[]): RegistryExample[] {
+  return entries.flatMap((item) => {
     if (item.type !== "registry:example") {
       return [];
     }
@@ -82,6 +95,10 @@ export async function fetchExampleComponents(): Promise<RegistryExample[]> {
 
     return parsedExample.success ? [parsedExample.data] : [];
   });
+}
+
+export async function fetchExampleComponents(): Promise<RegistryExample[]> {
+  return parseExampleComponents(await fetchRegistryEntries());
 }
 
 export async function fetchExampleDetails(
