@@ -11,6 +11,7 @@ import {
   fetchRegistryItemDetails,
   parseExampleComponents,
 } from "../registry/client.js";
+import { RegistryItemNotFoundError } from "../registry/errors.js";
 import { formatDisplayName } from "../utils/formatters.js";
 
 const DEFAULT_RESULT_LIMIT = 25;
@@ -103,7 +104,7 @@ export class RegistryService {
     const item = catalog.find((entry) => entry.name === name);
 
     if (!item) {
-      throw new Error(`Registry item "${name}" was not found`);
+      throw new RegistryItemNotFoundError(name);
     }
 
     const detail: RegistryCatalogItemDetail = {

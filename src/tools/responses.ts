@@ -1,3 +1,5 @@
+import { RegistryClientError } from "../registry/errors.js";
+
 export function createTextResponse(payload: unknown) {
   return {
     content: [
@@ -14,6 +16,10 @@ export function createErrorResponse(message: string, error?: unknown) {
 
   if (error instanceof Error) {
     errorMessage += `: ${error.message}`;
+
+    if (error instanceof RegistryClientError) {
+      errorMessage += ` [${error.code}]`;
+    }
   }
 
   return {
